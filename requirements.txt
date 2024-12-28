@@ -16,3 +16,8 @@ timm
 einops==0.8.0
 paddlepaddle
 paddleocr
+fastapi
+uvicorn
+python-dotenv
+python-multipart
+pillow
