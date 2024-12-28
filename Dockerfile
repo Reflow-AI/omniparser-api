@@ -27,12 +27,10 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
 
 # Initialize conda for shell interaction
 SHELL ["/bin/bash", "-c"]
-RUN conda init bash && \
-    . /root/.bashrc
 
 # Create conda environment and install dependencies
-RUN . /root/.bashrc && \
-    conda create -n omni python=3.12 -y && \
+RUN conda create -n omni python=3.12 -y && \
+    eval "$(conda shell.bash hook)" && \
     conda activate omni && \
     pip uninstall -y opencv-python opencv-python-headless && \
     pip install --no-cache-dir opencv-python-headless==4.8.1.78 && \
@@ -41,15 +39,16 @@ RUN . /root/.bashrc && \
     pip install ultralytics
 
 # Download model weights
-RUN . /root/.bashrc && \
+RUN eval "$(conda shell.bash hook)" && \
     conda activate omni && \
     python download.py
 
 # Make entrypoint script executable
 RUN chmod +x entrypoint.sh
 
-# Ensure we use the conda environment in the entrypoint
-RUN echo "conda activate omni" >> /root/.bashrc
+# Set up conda environment activation in entrypoint
+RUN echo 'eval "$(conda shell.bash hook)"' >> /root/.bashrc && \
+    echo "conda activate omni" >> /root/.bashrc
 
 # Set the entrypoint
 ENTRYPOINT ["./entrypoint.sh"] 
