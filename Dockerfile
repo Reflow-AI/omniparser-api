@@ -43,12 +43,15 @@ RUN eval "$(conda shell.bash hook)" && \
     conda activate omni && \
     python download.py
 
-# Make entrypoint script executable
-RUN chmod +x entrypoint.sh
-
-# Set up conda environment activation in entrypoint
+# Set up conda environment activation
 RUN echo 'eval "$(conda shell.bash hook)"' >> /root/.bashrc && \
     echo "conda activate omni" >> /root/.bashrc
 
+COPY entrypoint.sh /workspace/entrypoint.sh
+RUN chmod +x /workspace/entrypoint.sh
+
+# Expose port
+EXPOSE 1337
+
 # Set the entrypoint
-ENTRYPOINT ["./entrypoint.sh"] 
+ENTRYPOINT ["/workspace/entrypoint.sh"] 
