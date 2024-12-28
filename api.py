@@ -1,3 +1,9 @@
+"""
+OmniParser API Server
+Based on Microsoft's OmniParser (https://github.com/microsoft/OmniParser)
+Original work by Yadong Lu et al.
+"""
+
 from typing import Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException, Security, Depends
 from fastapi.responses import JSONResponse
@@ -182,3 +188,5 @@ if __name__ == "__main__":
     print(f"- Caption Model: {args.icon_caption_model}")
     print(f"- API Key Required: {bool(API_KEY)}")
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+
+
