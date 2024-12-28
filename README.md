@@ -2,25 +2,6 @@
 
 FastAPI server wrapper for the [OmniParser](https://github.com/microsoft/OmniParser) Image-to-text model.
 
-## License & Attribution
-This project is a wrapper around [Microsoft's OmniParser](https://github.com/microsoft/OmniParser). Please note the following licenses:
-- Original OmniParser is under CC-BY-4.0 license
-- Icon detection model (YOLO-based) is under AGPL license
-- Icon caption models (BLIP2 & Florence) are under MIT license
-
-If you use this project, please cite the original work:
-```bibtex
-@misc{lu2024omniparserpurevisionbased,
-      title={OmniParser for Pure Vision Based GUI Agent}, 
-      author={Yadong Lu and Jianwei Yang and Yelong Shen and Ahmed Awadallah},
-      year={2024},
-      eprint={2408.00203},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2408.00203}, 
-}
-```
-
 ## How it works
 OmniParser is a screen parsing tool that converts GUI screens into structured elements. It uses computer vision models to:
 - Detect UI elements and icons
@@ -126,4 +107,65 @@ curl -X POST "https://<pod-id>-1337.proxy.runpod.net/process_image" \
 - Storage: 20GB minimum
 - Network: Open port 1337
 
+## RunPod Serverless Deployment
 
+1. Build the serverless image:
+```bash
+docker build -t yourusername/omni-parser-runpod:latest -f Dockerfile.runpod .
+```
+
+2. Push to Docker Hub:
+```bash
+docker push yourusername/omni-parser-runpod:latest
+```
+
+3. Create RunPod endpoint:
+```bash
+runpod endpoint create \
+    --name omniparser \
+    --image yourusername/omni-parser-runpod:latest \
+    --gpu-type NVIDIA_RTX_3090 \
+    --min-workers 1
+```
+
+4. Test the endpoint:
+```python
+import runpod
+import base64
+
+# Load and encode image
+with open("screenshot.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+
+# Call endpoint
+runpod.api_key = "your_runpod_api_key"
+response = runpod.run(
+    endpoint_id="your_endpoint_id",
+    input={
+        "image": encoded_string,
+        "box_threshold": 0.05,
+        "iou_threshold": 0.1
+    }
+)
+
+print(response)
+```
+
+## License & Attribution
+This project is a wrapper around [Microsoft's OmniParser](https://github.com/microsoft/OmniParser). Please note the following licenses:
+- Original OmniParser is under CC-BY-4.0 license
+- Icon detection model (YOLO-based) is under AGPL license
+- Icon caption models (BLIP2 & Florence) are under MIT license
+
+If you use this project, please cite the original work:
+```bibtex
+@misc{lu2024omniparserpurevisionbased,
+      title={OmniParser for Pure Vision Based GUI Agent}, 
+      author={Yadong Lu and Jianwei Yang and Yelong Shen and Ahmed Awadallah},
+      year={2024},
+      eprint={2408.00203},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2408.00203}, 
+}
+```
