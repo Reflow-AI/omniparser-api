@@ -54,4 +54,4 @@ RUN chmod +x /workspace/entrypoint.sh
 EXPOSE 1337
 
 # Set the entrypoint
-ENTRYPOINT ["/workspace/entrypoint.sh"] 
+CMD ["/workspace/entrypoint.sh"] 
