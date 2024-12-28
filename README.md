@@ -151,6 +151,11 @@ response = runpod.run(
 print(response)
 ```
 
+## Stress Test
+```bash
+python stress_test.py --endpoint_id <endpoint_id> --api_key <api_key> --users 10 --requests 100 --payload screenshot.png
+```
+
 ## License & Attribution
 This project is a wrapper around [Microsoft's OmniParser](https://github.com/microsoft/OmniParser). Please note the following licenses:
 - Original OmniParser is under CC-BY-4.0 license
