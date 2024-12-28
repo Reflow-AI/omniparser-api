@@ -49,6 +49,110 @@ python gradio_demo.py --icon_detect_model weights/icon_detect/best.pt --icon_cap
 python gradio_demo.py --icon_detect_model weights/icon_detect_v1_5/model_v1_5.pt --icon_caption_model florence2
 ```
 
+
+## RunPod Deployment Guide
+
+### Option 1: Using Docker
+
+1. Build and push the Docker image:
+```bash
+docker build -t your-dockerhub-username/omniparser:latest .
+docker push your-dockerhub-username/omniparser:latest
+```
+
+2. On RunPod:
+   - Create a new template or use an existing one
+   - Set the Docker image URL
+   - Add environment variables in the RunPod UI:
+     - `API_KEY`: Your API key for authentication
+     - `PORT`: Port for the API server (default: 1337)
+     - `ICON_DETECT_MODEL`: Path to detection model
+     - `ICON_CAPTION_MODEL`: Caption model type (florence2 or blip2)
+
+### Option 2: Direct Deployment
+
+1. Clone the repository on RunPod:
+```bash
+git clone https://github.com/your-username/omniparser.git
+cd omniparser
+```
+
+2. Create a `.env` file:
+```bash
+cat << EOF > .env
+API_KEY=your_api_key_here
+PORT=1337
+ICON_DETECT_MODEL=weights/icon_detect_v1_5/model_v1_5.pt
+ICON_CAPTION_MODEL=florence2
+EOF
+```
+
+3. Run the installation script:
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+### Accessing the API
+
+- The API will be available at: `https://[pod-id]-[port].proxy.runpod.net`
+- API documentation: `https://[pod-id]-[port].proxy.runpod.net/docs`
+- Include your API key in requests using the `X-API-Key` header
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `API_KEY` | Authentication key for API access | None |
+| `PORT` | Port for the API server | 1337 |
+| `ICON_DETECT_MODEL` | Path to detection model | weights/icon_detect_v1_5/model_v1_5.pt |
+| `ICON_CAPTION_MODEL` | Caption model type (florence2 or blip2) | florence2 |
+
+### Using RunPod CLI
+
+To deploy using RunPod CLI:
+```bash
+runpodctl create pod \
+  --env API_KEY=your_key \
+  --env PORT=1337 \
+  --env ICON_DETECT_MODEL=weights/icon_detect_v1_5/model_v1_5.pt \
+  --env ICON_CAPTION_MODEL=florence2 \
+  --gpu "NVIDIA RTX 4000" \
+  --container your-dockerhub-username/omniparser:latest \
+  --name omniparser
+```
+
+### Example API Usage
+
+Using curl:
+```bash
+curl -X POST \
+  https://[pod-id]-[port].proxy.runpod.net/process \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"image": "base64_encoded_image"}'
+```
+
+Using Python:
+```python
+import requests
+import base64
+
+# Encode image
+with open("screenshot.png", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read()).decode()
+
+# Make request
+response = requests.post(
+    "https://[pod-id]-[port].proxy.runpod.net/process",
+    headers={"X-API-Key": "your_api_key"},
+    json={"image": encoded_string}
+)
+
+print(response.json())
+```
+
+
 ## Model Weights License
 For the model checkpoints on huggingface model hub, please note that icon_detect model is under AGPL license since it is a license inherited from the original yolo model. And icon_caption_blip2 & icon_caption_florence is under MIT license. Please refer to the LICENSE file in the folder of each model: https://huggingface.co/microsoft/OmniParser.
 
