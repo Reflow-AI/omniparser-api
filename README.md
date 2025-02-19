@@ -8,7 +8,7 @@ OmniParser is a screen parsing tool that converts GUI screens into structured el
 - Extract text using OCR
 - Generate descriptions for visual elements
 
-## Getting Started
+📢 [[Project Page](https://microsoft.github.io/OmniParser/)] [[V2 Blog Post](https://www.microsoft.com/en-us/research/articles/omniparser-v2-turning-any-llm-into-a-computer-use-agent/)] [[Models V2](https://huggingface.co/microsoft/OmniParser-v2.0)] [[Models V1.5](https://huggingface.co/microsoft/OmniParser)] [[HuggingFace Space Demo](https://huggingface.co/spaces/microsoft/OmniParser-v2)]
 
 ### Local
 1. Clone the repository
@@ -22,139 +22,43 @@ docker run -p 1337:1337 -e API_KEY=your_secret_key omni-parser
 ```
 4. Access the API at `http://localhost:1337`
 
-### API Usage
+## News
+- [2025/2] We release OmniParser V2 [checkpoints](https://huggingface.co/microsoft/OmniParser-v2.0). [Watch Video](https://1drv.ms/v/c/650b027c18d5a573/EWXbVESKWo9Buu6OYCwg06wBeoM97C6EOTG6RjvWLEN1Qg?e=alnHGC)
+- [2025/2] We introduce OmniTool: Control a Windows 11 VM with OmniParser + your vision model of choice. OmniTool supports out of the box the following large language models - OpenAI (4o/o1/o3-mini), DeepSeek (R1), Qwen (2.5VL) or Anthropic Computer Use. [Watch Video](https://1drv.ms/v/c/650b027c18d5a573/EehZ7RzY69ZHn-MeQHrnnR4BCj3by-cLLpUVlxMjF4O65Q?e=8LxMgX)
+- [2025/1] V2 is coming. We achieve new state of the art results 39.5% on the new grounding benchmark [Screen Spot Pro](https://github.com/likaixin2000/ScreenSpot-Pro-GUI-Grounding/tree/main) with OmniParser v2 (will be released soon)! Read more details [here](https://github.com/microsoft/OmniParser/tree/master/docs/Evaluation.md).
+- [2024/11] We release an updated version, OmniParser V1.5 which features 1) more fine grained/small icon detection, 2) prediction of whether each screen element is interactable or not. Examples in the demo.ipynb. 
+- [2024/10] OmniParser was the #1 trending model on huggingface model hub (starting 10/29/2024). 
+- [2024/10] Feel free to checkout our demo on [huggingface space](https://huggingface.co/spaces/microsoft/OmniParser)! (stay tuned for OmniParser + Claude Computer Use)
+- [2024/10] Both Interactive Region Detection Model and Icon functional description model are released! [Hugginface models](https://huggingface.co/microsoft/OmniParser)
+- [2024/09] OmniParser achieves the best performance on [Windows Agent Arena](https://microsoft.github.io/WindowsAgentArena/)! 
 
-#### Process an Image
-```
-curl -X POST "http://localhost:1337/process_image" \
-  -H "X-API-Key: your_api_key" \
-  -F "image=@screenshot.png" \
-  -F "box_threshold=0.05" \
-  -F "iou_threshold=0.1"
-```
-
-#### Parameters
-- `box_threshold` (float, default: 0.05): Detection confidence threshold
-- `iou_threshold` (float, default: 0.1): Intersection over Union threshold
-- `use_paddleocr` (bool, default: false): Use PaddleOCR instead of EasyOCR
-- `imgsz` (int, default: 1920): Input image size
-- `icon_process_batch_size` (int, default: 64): Batch size for icon processing
-
-#### Response Format
-```
-{
-  "image": "base64_encoded_processed_image",
-  "parsed_content_list": [
-    {
-      "type": "text/icon",
-      "content": "description",
-      "coordinates": [x1, y1, x2, y2]
-    }
-  ],
-  "label_coordinates": {
-    "element_id": {
-      "bbox": [x1, y1, x2, y2],
-      "label": "description"
-    }
-  }
-}
-```
-
-
-# Deploy on RunPod
-
-##  Using Pre-built Template
-
-1. Visit: https://runpod.io/console/deploy?template=fcslnl2rq4&ref=ccxrf2yd
-2. Select Configuration:
-   - GPU: RTX 3090 or better
-   - Disk: 80GB
-   - Environment Variables: API_KEY=your_secret_key
-3. Click Deploy and wait for the pod to be ready (3-5 minutes)
-4. Access API: https://<pod-id>-1337.proxy.runpod.net/docs
-
-## Method 2: Custom Deployment
-
-1. Build & Push Docker Image:
-```bash
-docker login
-docker build -t yourusername/omni-parser:latest .
-docker push yourusername/omni-parser:latest
-```
-
-2. Create Template:
-   - RunPod Console → Templates → New Template
-   - Settings:
-     - Image: yourusername/omni-parser:latest
-     - Disk: 20GB
-     - Ports: 1337
-     - Env: API_KEY=your_secret_key
-
-3. Deploy:
-   - Select GPU (RTX 3090+)
-   - Deploy container
-   - Wait for initialization
-
-## Test API
-```bash
-curl -X POST "https://<pod-id>-1337.proxy.runpod.net/process_image" \
-  -H "X-API-Key: your_api_key" \
-  -F "image=@screenshot.png"
-```
-
-## Requirements
-- GPU: 12GB+ VRAM
-- Storage: 20GB minimum
-- Network: Open port 1337
-
-## RunPod Serverless Deployment
-
-1. Build the serverless image:
-```bash
-docker build -t yourusername/omni-parser-runpod:latest -f Dockerfile.runpod .
-```
-
-2. Push to Docker Hub:
-```bash
-docker push yourusername/omni-parser-runpod:latest
-```
-
-3. Create RunPod endpoint:
-```bash
-runpod endpoint create \
-    --name omniparser \
-    --image yourusername/omni-parser-runpod:latest \
-    --gpu-type NVIDIA_RTX_3090 \
-    --min-workers 1
-```
-
-4. Test the endpoint:
+## Install 
+First clone the repo, and then install environment:
 ```python
-import runpod
-import base64
-
-# Load and encode image
-with open("screenshot.png", "rb") as image_file:
-    encoded_string = base64.b64encode(image_file.read()).decode()
-
-# Call endpoint
-runpod.api_key = "your_runpod_api_key"
-response = runpod.run(
-    endpoint_id="your_endpoint_id",
-    input={
-        "image": encoded_string,
-        "box_threshold": 0.05,
-        "iou_threshold": 0.1
-    }
-)
-
-print(response)
+cd OmniParser
+conda create -n "omni" python==3.12
+conda activate omni
+pip install -r requirements.txt
 ```
 
-## Stress Test
-```bash
-python stress_test.py --endpoint_id <endpoint_id> --api_key <api_key> --users 10 --requests 100 --payload screenshot.png
+Ensure you have the V2 weights downloaded in weights folder (ensure caption weights folder is called icon_caption_florence). If not download them with:
 ```
+   # download the model checkpoints to local directory OmniParser/weights/
+   for f in icon_detect/{train_args.yaml,model.pt,model.yaml} icon_caption/{config.json,generation_config.json,model.safetensors}; do huggingface-cli download microsoft/OmniParser-v2.0 "$f" --local-dir weights; done
+   mv weights/icon_caption weights/icon_caption_florence
+```
+
+<!-- ## [deprecated]
+Then download the model ckpts files in: https://huggingface.co/microsoft/OmniParser, and put them under weights/, default folder structure is: weights/icon_detect, weights/icon_caption_florence, weights/icon_caption_blip2. 
+
+For v1: 
+convert the safetensor to .pt file. 
+```python
+python weights/convert_safetensor_to_pt.py
+
+For v1.5: 
+download 'model_v1_5.pt' from https://huggingface.co/microsoft/OmniParser/tree/main/icon_detect_v1_5, make a new dir: weights/icon_detect_v1_5, and put it inside the folder. No weight conversion is needed. 
+``` -->
 
 ## License & Attribution
 This project is a wrapper around [Microsoft's OmniParser](https://github.com/microsoft/OmniParser). Please note the following licenses:
@@ -162,8 +66,19 @@ This project is a wrapper around [Microsoft's OmniParser](https://github.com/mic
 - Icon detection model (YOLO-based) is under AGPL license
 - Icon caption models (BLIP2 & Florence) are under MIT license
 
-If you use this project, please cite the original work:
-```bibtex
+## Gradio Demo
+To run gradio demo, simply run:
+```python
+python gradio_demo.py
+```
+
+## Model Weights License
+For the model checkpoints on huggingface model hub, please note that icon_detect model is under AGPL license since it is a license inherited from the original yolo model. And icon_caption_blip2 & icon_caption_florence is under MIT license. Please refer to the LICENSE file in the folder of each model: https://huggingface.co/microsoft/OmniParser.
+
+## 📚 Citation
+Our technical report can be found [here](https://arxiv.org/abs/2408.00203).
+If you find our work useful, please consider citing our work:
+```
 @misc{lu2024omniparserpurevisionbased,
       title={OmniParser for Pure Vision Based GUI Agent}, 
       author={Yadong Lu and Jianwei Yang and Yelong Shen and Ahmed Awadallah},
